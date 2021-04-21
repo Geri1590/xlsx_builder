@@ -380,6 +380,8 @@ IS
 
    FUNCTION query2sheet (p_sql VARCHAR2, p_column_headers BOOLEAN := TRUE, p_sheet PLS_INTEGER := NULL)
       RETURN BLOB;
+  
+   PROCEDURE query2sheet (p_sql VARCHAR2, p_column_headers BOOLEAN := TRUE, p_sheet PLS_INTEGER := NULL);
 
    FUNCTION finish2 (p_clob                 IN OUT NOCOPY CLOB,
                      p_columns              PLS_INTEGER,

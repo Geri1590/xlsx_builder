@@ -267,7 +267,7 @@ IS
        dbms_lob.writeappend(p_clob, LENGTH(p_vc_buffer), p_vc_buffer);
        p_vc_buffer := p_vc_addition;
      END IF;
-    
+
      -- Full Flush requested
      IF p_eof THEN
        IF p_clob IS NULL THEN
@@ -1208,7 +1208,7 @@ IS
          p_eof         => TRUE);
       zip_util_pkg.add_file (t_excel, '[Content_Types].xml', t_xxx);
       t_xxx := NULL;
-      
+
       clob_vc_concat(
          p_clob        => t_xxx,
          p_vc_buffer   => t_tmp,
@@ -1473,7 +1473,7 @@ IS
          p_eof         => TRUE);
       zip_util_pkg.add_file (t_excel, 'xl/styles.xml', t_xxx);
       t_xxx := NULL;
-      
+
       clob_vc_concat(
          p_clob        => t_xxx,
          p_vc_buffer   => t_tmp,
@@ -1557,7 +1557,7 @@ IS
          p_eof         => TRUE);
       zip_util_pkg.add_file (t_excel, 'xl/workbook.xml', t_xxx);
       t_xxx := NULL;
-      
+
       clob_vc_concat(
          p_clob        => t_xxx,
          p_vc_buffer   => t_tmp,
@@ -2338,7 +2338,7 @@ IS
                p_eof         => TRUE);
             zip_util_pkg.add_file (t_excel, 'xl/comments' || TO_CHAR (s) || '.xml', t_xxx);
             t_xxx := NULL;
-            
+
             clob_vc_concat(
                p_clob        => t_xxx,
                p_vc_buffer   => t_tmp,
@@ -2473,8 +2473,7 @@ IS
       RETURN t_excel;
    END finish;
 
-   FUNCTION query2sheet (p_sql VARCHAR2, p_column_headers BOOLEAN := TRUE, p_sheet PLS_INTEGER := NULL)
-      RETURN BLOB
+   PROCEDURE query2sheet (p_sql VARCHAR2, p_column_headers BOOLEAN := TRUE, p_sheet PLS_INTEGER := NULL)
    AS
       t_sheet       PLS_INTEGER;
       t_c           INTEGER;
@@ -2618,15 +2617,26 @@ IS
       END LOOP;
 
       DBMS_SQL.close_cursor (t_c);
+   EXCEPTION
+    WHEN OTHERS
+    THEN
+       IF DBMS_SQL.is_open (t_c)
+       THEN
+          DBMS_SQL.close_cursor (t_c);
+       END IF;
+       
+       RAISE;
+   END query2sheet;
+   
+   FUNCTION query2sheet (p_sql VARCHAR2, p_column_headers BOOLEAN := TRUE, p_sheet PLS_INTEGER := NULL)
+      RETURN BLOB
+   AS
+   BEGIN
+      query2sheet(p_sql, p_column_headers, p_sheet);
       RETURN finish;
    EXCEPTION
       WHEN OTHERS
       THEN
-         IF DBMS_SQL.is_open (t_c)
-         THEN
-            DBMS_SQL.close_cursor (t_c);
-         END IF;
-
          RETURN NULL;
    END query2sheet;
 
@@ -2832,7 +2842,7 @@ IS
          DBMS_LOB.writeappend(t_clob_sql, length(t_str), t_str);
       END LOOP;
       t_str := ') as t_xml from dual ';
-      
+
       DBMS_LOB.writeappend(t_clob_sql, length(t_str), t_str);
       t_str := ' union all select '
             ||      'xmlelement("row",';
